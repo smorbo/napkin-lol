@@ -1,0 +1,669 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --font-sans: "DM Sans", sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.12 0.01 260);
+  --foreground: oklch(0.98 0.01 240);
+  --card: oklch(0.99 0.01 240 / 0.1);
+  --card-foreground: oklch(0.98 0.01 240);
+  --popover: oklch(0.19 0.015 260 / 0.96);
+  --popover-foreground: oklch(0.98 0.01 240);
+  --primary: oklch(0.9 0.105 93);
+  --primary-foreground: oklch(0.16 0.015 260);
+  --secondary: oklch(0.98 0.01 240 / 0.12);
+  --secondary-foreground: oklch(0.98 0.01 240);
+  --muted: oklch(0.98 0.01 240 / 0.08);
+  --muted-foreground: oklch(0.84 0.04 245);
+  --accent: oklch(0.9 0.105 93 / 0.16);
+  --accent-foreground: oklch(0.98 0.01 240);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.98 0.01 240 / 0.2);
+  --input: oklch(0.98 0.01 240 / 0.16);
+  --ring: oklch(0.9 0.105 93);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.9 0.105 93);
+  --primary-foreground: oklch(0.16 0.015 260);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.94 0.06 93);
+  --accent: oklch(0.9 0.105 93 / 0.16);
+  --accent-foreground: oklch(0.9 0.105 93);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.9 0.105 93);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    min-width: 320px;
+  }
+}
+
+@utility mesh-background {
+  background:
+    radial-gradient(ellipse 90% 70% at 15% 8%, oklch(0.31 0.045 93 / 0.16), transparent 72%),
+    radial-gradient(ellipse 80% 75% at 88% 32%, oklch(0.23 0.012 280 / 0.12), transparent 74%),
+    radial-gradient(ellipse 100% 65% at 50% 100%, oklch(0.22 0.012 230 / 0.1), transparent 76%),
+    var(--color-background);
+}
+
+@utility glass-panel {
+  background: oklch(0.98 0.01 240 / 0.075);
+  border: 1px solid oklch(0.98 0.01 240 / 0.14);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.16),
+    0 24px 60px oklch(0.04 0.01 260 / 0.42);
+  transform: translateZ(0);
+}
+
+@utility glass-panel-solid {
+  background: oklch(0.16 0.015 260 / 0.88);
+  border: 1px solid oklch(0.98 0.01 240 / 0.18);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 24px 60px oklch(0.04 0.01 260 / 0.5);
+  transform: translateZ(0);
+}
+
+@utility privacy-glass {
+  background: oklch(0.12 0.01 260 / 0.85);
+  border-color: oklch(0.98 0.01 240 / 0.24);
+}
+
+@utility copy-success {
+  color: oklch(0.99 0.005 150) !important;
+  background: oklch(0.56 0.16 150) !important;
+
+  &:hover {
+    color: oklch(0.99 0.005 150) !important;
+    background: oklch(0.51 0.15 150) !important;
+  }
+}
+
+@utility door-open {
+  color: oklch(0.99 0.005 150) !important;
+  background: oklch(0.5 0.13 150 / 0.72) !important;
+
+  &:hover {
+    color: oklch(0.99 0.005 150) !important;
+    background: oklch(0.55 0.14 150 / 0.84) !important;
+  }
+}
+
+@utility door-closed {
+  color: oklch(0.12 0.02 25) !important;
+  background: oklch(0.73 0.14 25 / 0.82) !important;
+
+  &:hover {
+    color: oklch(0.12 0.02 25) !important;
+    background: oklch(0.78 0.15 25 / 0.9) !important;
+  }
+}
+
+@utility selected-control {
+  border-width: 1px;
+  border-style: solid;
+  box-shadow:
+    0 0 0 2px var(--board-control-bg),
+    0 8px 24px oklch(0.03 0.01 260 / 0.36);
+}
+
+/* Canvas controls keep their own contrast because the board can invert independently. */
+/* The section behind the board is a distinct matte "tray" so the
+   drawable area reads as a separate surface you can draw on. */
+.board-surface-light {
+  --board-control-bg: oklch(0.18 0.01 260 / 0.96);
+  --board-control-fg: oklch(0.98 0.005 240);
+  --board-control-border: oklch(0.08 0.01 260 / 0.32);
+  --board-control-hover: oklch(0.3 0.015 260);
+  --board-selection: oklch(0.22 0.015 260);
+  background-color: #d9dbe4;
+}
+
+.board-surface-dark {
+  --board-control-bg: oklch(0.96 0.005 240 / 0.96);
+  --board-control-fg: oklch(0.16 0.01 260);
+  --board-control-border: oklch(1 0 0 / 0.4);
+  --board-control-hover: oklch(0.86 0.01 240);
+  --board-selection: oklch(0.96 0.005 240);
+  background-color: #060709;
+}
+
+.room-shell {
+  height: calc(var(--app-vh, 100dvh) - 2rem);
+}
+
+@media (min-width: 40rem) {
+  .room-shell {
+    height: calc(var(--app-vh, 100dvh) - 3rem);
+  }
+}
+
+/* The drawable board itself: solid canvas colour, crisp edge, yellow halo. */
+.board-frame-light {
+  background-color: #f5f7fb;
+  box-shadow:
+    0 0 0 1px oklch(0.4 0.01 260 / 0.5),
+    0 0 0 5px oklch(0.9 0.105 93 / 0.35),
+    0 24px 60px -12px oklch(0 0 0 / 0.55);
+}
+
+.board-frame-dark {
+  background-color: #12141c;
+  box-shadow:
+    inset 0 0 0 1px oklch(1 0 0 / 0.18),
+    0 0 0 1px oklch(0.9 0.105 93 / 0.45),
+    0 0 0 5px oklch(0.9 0.105 93 / 0.2),
+    0 0 48px -8px oklch(0.9 0.105 93 / 0.22),
+    0 24px 60px -12px oklch(0 0 0 / 0.85);
+}
+
+@utility board-control {
+  color: var(--board-control-fg);
+  background: var(--board-control-bg);
+  border: 1px solid var(--board-control-border);
+  box-shadow: 0 8px 24px oklch(0.03 0.01 260 / 0.28);
+
+  &:hover {
+    color: var(--board-control-fg) !important;
+    background: var(--board-control-hover) !important;
+  }
+}
+
+@utility board-selection {
+  border-color: var(--board-selection);
+}
+
+@keyframes mesh-drift {
+  50% {
+    background-position:
+      8% 4%,
+      94% 32%,
+      48% 76%,
+      0 0;
+  }
+}
+
+@keyframes knock-pulse {
+  50% {
+    opacity: 0.58;
+    transform: scale(0.88);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .knock-pulse {
+    animation: knock-pulse 1.35s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mesh-animated {
+    animation: mesh-drift 32s ease-in-out infinite;
+    background-size: 104% 104%;
+  }
+}
+
+@keyframes word-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(0.18em);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes code-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+
+@utility animate-code-shake {
+  animation: code-shake 360ms ease-in-out;
+}
+
+@keyframes word-scribble {
+  0% {
+    clip-path: inset(0 100% -20% 0);
+    transform: rotate(-3.5deg) translateY(0.06em);
+  }
+  55% {
+    clip-path: inset(0 22% -20% 0);
+    transform: rotate(-1.4deg) translateY(0.02em);
+  }
+  100% {
+    clip-path: inset(0 -6% -20% 0);
+    transform: rotate(-1.8deg) translateY(0);
+  }
+}
+
+.font-scribble {
+  font-family: Caveat, "Segoe Script", cursive;
+}
+
+.word-scribble {
+  transform: rotate(-1.8deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .word-enter {
+    animation: word-enter 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .word-scribble {
+    animation: word-scribble 640ms cubic-bezier(0.4, 0.05, 0.2, 1);
+  }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes hero-note {
+  0% { transform: translateX(110%); opacity: 0; }
+  9% { transform: translateX(0); opacity: 1; }
+  82% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(110%); opacity: 0; }
+}
+
+.hero-note {
+  animation: hero-note 3.9s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-note {
+    animation: none;
+  }
+}
+
+@keyframes card-in {
+  from { transform: translateY(48px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Loader — three boxes drawn in turn; as the last box finishes it turns
+   solid (hiding the lines behind it) and the smiley fades in on top. */
+@keyframes napkin-stroke {
+  0% { stroke-dashoffset: var(--dash, 250); opacity: 1; }
+  18% { stroke-dashoffset: 0; opacity: 1; }
+  92% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes napkin-face-in {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes napkin-front-fill {
+  0% { fill-opacity: 0; }
+  10% { fill-opacity: 0; }
+  22% { fill-opacity: 1; }
+  92% { fill-opacity: 1; }
+  100% { fill-opacity: 0; }
+}
+
+.napkin-draw {
+  width: 72px;
+  height: 72px;
+  color: var(--primary);
+}
+
+.napkin-draw rect {
+  stroke-dashoffset: 250;
+  animation: napkin-stroke 4s ease-in-out infinite;
+}
+
+.napkin-draw .napkin-face {
+  stroke-width: 4.5;
+  opacity: 0;
+  animation: napkin-face-in 4s ease-in-out infinite;
+}
+
+.napkin-draw .napkin-eye {
+  fill: currentColor;
+}
+
+.napkin-draw .napkin-smile {
+  stroke-width: 5;
+}
+
+.napkin-draw .napkin-front {
+  fill: oklch(0.18 0.02 260);
+  fill-opacity: 0;
+  animation: napkin-stroke 4s ease-in-out infinite, napkin-front-fill 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .napkin-draw rect,
+  .napkin-draw path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .napkin-draw .napkin-face {
+    opacity: 1;
+  }
+  .napkin-draw .napkin-front {
+    fill-opacity: 1;
+  }
+}
+
+/* Mobile: no pinch/double-tap zoom on the interface, taps stay responsive. */
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+/* Shred outcome flashes: the board slices apart, or the save is celebrated */
+@keyframes shred-slice {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(120%) rotate(6deg); opacity: 0; }
+}
+
+@keyframes saved-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  25% { transform: scale(1.06); opacity: 1; }
+  70% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes hp-chip {
+  0% { filter: brightness(2); }
+  100% { filter: brightness(1); }
+}
+
+/* Stop iOS/iPadOS from turning board drags into text selection or callouts */
+.napkin-no-select,
+.napkin-no-select * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.napkin-no-select input,
+.napkin-no-select textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.napkin-no-select canvas {
+  touch-action: none;
+}
+
+/* Home-page demo: a Napkin drawing itself while guests move around */
+.demo-draw {
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  animation: demo-draw 1.1s ease-out forwards;
+}
+.demo-draw-2 { animation-delay: 1s; }
+.demo-draw-3 { animation-delay: 1.7s; }
+.demo-draw-4 { animation-delay: 2.3s; }
+.demo-draw-5 { animation-delay: 3s; }
+@keyframes demo-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.demo-fade {
+  opacity: 0;
+  animation: demo-fade 0.5s ease-out forwards;
+}
+.demo-fade-1 { animation-delay: 2.1s; }
+.demo-fade-2 { animation-delay: 3.6s; }
+.demo-fade-3 { animation-delay: 3.8s; }
+@keyframes demo-fade {
+  to { opacity: 1; }
+}
+
+.demo-cursor-a { animation: demo-cursor-a 14s ease-in-out infinite; }
+.demo-cursor-b { animation: demo-cursor-b 17s ease-in-out infinite; }
+@keyframes demo-cursor-a {
+  0%, 10% { left: 14%; top: 26%; }
+  35%, 45% { left: 56%; top: 22%; }
+  70%, 80% { left: 36%; top: 58%; }
+  100% { left: 14%; top: 26%; }
+}
+@keyframes demo-cursor-b {
+  0%, 12% { left: 68%; top: 62%; }
+  40%, 50% { left: 30%; top: 68%; }
+  75%, 85% { left: 60%; top: 44%; }
+  100% { left: 68%; top: 62%; }
+}
+
+.demo-bubble { animation: demo-bubble 12s ease-in-out infinite; }
+@keyframes demo-bubble {
+  0%, 5% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  12%, 78% { opacity: 1; transform: translateY(0) scale(1); }
+  88%, 100% { opacity: 0; transform: translateY(6px) scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-draw, .demo-fade, .demo-bubble, .demo-cursor-a, .demo-cursor-b {
+    animation: none !important;
+  }
+  .demo-draw { stroke-dashoffset: 0; }
+  .demo-fade { opacity: 1; }
+  .demo-bubble { opacity: 1; transform: none; }
+}
+
+/* Home-page walkthrough: four looping step visuals. */
+@keyframes wt-pop {
+  0%, 18% { opacity: 0; transform: translateY(6px) scale(0.9); }
+  28%, 92% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(6px) scale(0.9); }
+}
+
+@keyframes wt-tap {
+  0%, 30% { transform: scale(1); }
+  38% { transform: scale(0.86); }
+  46%, 100% { transform: scale(1); }
+}
+
+.wt-tap { animation: wt-tap 6s ease-in-out infinite; }
+.wt-code { animation: wt-pop 6s ease-out infinite; }
+.wt-link {
+  opacity: 0;
+  animation: wt-pop 6s ease-out infinite;
+  animation-delay: 1.4s;
+}
+
+.wt-draw {
+  stroke-dasharray: 320;
+  animation: wt-draw 6s ease-out infinite;
+}
+.wt-draw-2 { animation-delay: 1.6s; }
+@keyframes wt-draw {
+  0% { stroke-dashoffset: 320; opacity: 0; }
+  5% { opacity: 1; }
+  55% { stroke-dashoffset: 0; opacity: 1; }
+  88% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+.wt-cursor-a { animation: wt-cursor-a 9s ease-in-out infinite; }
+.wt-cursor-b { animation: wt-cursor-b 9s ease-in-out infinite; }
+@keyframes wt-cursor-a {
+  0%, 15% { left: 18%; top: 30%; }
+  45%, 60% { left: 60%; top: 24%; }
+  85%, 100% { left: 18%; top: 30%; }
+}
+@keyframes wt-cursor-b {
+  0%, 15% { left: 66%; top: 58%; }
+  45%, 60% { left: 30%; top: 66%; }
+  85%, 100% { left: 66%; top: 58%; }
+}
+
+.wt-tile { animation: wt-tile 6s ease-in-out infinite; }
+@keyframes wt-tile {
+  0%, 100% {
+    background-color: transparent;
+    color: inherit;
+    box-shadow: none;
+    transform: none;
+  }
+  6%, 22% {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-color: transparent;
+    box-shadow: 0 0 18px -4px oklch(0.9 0.105 93 / 0.5);
+    transform: translateY(-2px);
+  }
+}
+
+.wt-vanish { animation: wt-vanish 6s ease-in-out infinite; }
+@keyframes wt-vanish {
+  0%, 42% { opacity: 1; filter: blur(0); transform: none; }
+  70%, 100% { opacity: 0; filter: blur(10px); transform: translateY(14px) scale(0.97); }
+}
+
+.wt-ember {
+  opacity: 0;
+  animation: wt-ember 6s ease-out infinite;
+  animation-delay: 3.4s;
+}
+@keyframes wt-ember {
+  0%, 50% { opacity: 0; transform: translateY(0) scale(0.6); }
+  68% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-26px) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wt-tap, .wt-code, .wt-link, .wt-draw, .wt-cursor-a, .wt-cursor-b,
+  .wt-tile, .wt-vanish, .wt-ember {
+    animation: none !important;
+  }
+  .wt-code, .wt-link, .wt-draw { opacity: 1; }
+  .wt-draw { stroke-dashoffset: 0; }
+  .wt-vanish { opacity: 1; filter: none; }
+  .wt-ember { opacity: 0; }
+}

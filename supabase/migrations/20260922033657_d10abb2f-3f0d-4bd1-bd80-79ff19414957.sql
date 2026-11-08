@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can read room images" ON storage.objects;
