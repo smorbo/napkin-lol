@@ -179,13 +179,11 @@ const DOODLES = [
   doodleSpiral,
 ];
 
-const ZONES: [number, number][] = [
-  [0.22, 0.3],
-  [0.74, 0.27],
-  [0.27, 0.68],
-  [0.7, 0.64],
-  [0.48, 0.42],
-];
+/** Candidate doodle spots on a loose grid, tried in random order. */
+const SPOTS: [number, number][] = [];
+for (const cx of [0.17, 0.38, 0.6, 0.82]) {
+  for (const cy of [0.24, 0.48, 0.71]) SPOTS.push([cx, cy]);
+}
 
 const NOTES = ["hi!", "nice one", "my turn", "ooh — good line", "draw with me"];
 
@@ -193,6 +191,7 @@ export function NapkinHero() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
+  const nickBoxesRef = useRef<{ x0: number; y0: number; x1: number; y1: number }[]>([]);
   const drawingRef = useRef<Stroke | null>(null);
   const rafRef = useRef(0);
   const nickBusyRef = useRef(false);
@@ -356,22 +355,68 @@ export function NapkinHero() {
       const unit = Math.min(width, height) * 0.36;
       if (unit <= 0) return;
       const make = DOODLES[Math.floor(Math.random() * DOODLES.length)];
-      const zone = ZONES[Math.floor(Math.random() * ZONES.length)];
       const raw = make();
       const total = raw.reduce((sum, s) => sum + s.length, 0);
-      const strokes: Stroke[] = raw.map((pts) => ({
-        author: "nick" as const,
-        color: NICK_COLOR,
-        wetColor: shade(NICK_COLOR, 0.22),
-        width: 3,
-        points: pts.map(([px, py]) => ({
-          x: (zone[0] * width + ((px - 50) / 100) * unit) / width,
-          y: (zone[1] * height + ((py - 50) / 100) * unit) / height,
-        })),
-        reveal: 0,
-        bornAt: performance.now(),
-        done: false,
-      }));
+
+      // Pick a spot with manners: the doodle's box must stay on the napkin,
+      // clear every stroke the visitor has laid down, and not crowd a spot
+      // Nick has already used this session. No clear spot — he sits it out.
+      const order = [...SPOTS];
+      for (let i = order.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j]!, order[i]!];
+      }
+      const padX = 0.045;
+      const padY = 0.055;
+      let strokes: Stroke[] | null = null;
+      for (const [cx, cy] of order) {
+        const placed = raw.map((pts) =>
+          pts.map(([px, py]) => ({
+            x: (cx * width + ((px - 50) / 100) * unit) / width,
+            y: (cy * height + ((py - 50) / 100) * unit) / height,
+          })),
+        );
+        let x0 = Infinity;
+        let y0 = Infinity;
+        let x1 = -Infinity;
+        let y1 = -Infinity;
+        for (const pts of placed) {
+          for (const pt of pts) {
+            x0 = Math.min(x0, pt.x);
+            y0 = Math.min(y0, pt.y);
+            x1 = Math.max(x1, pt.x);
+            y1 = Math.max(y1, pt.y);
+          }
+        }
+        if (x0 < 0.01 || y0 < 0.01 || x1 > 0.99 || y1 > 0.99) continue;
+        const box = { x0: x0 - padX, y0: y0 - padY, x1: x1 + padX, y1: y1 + padY };
+        const hitsYours = strokesRef.current.some(
+          (stroke) =>
+            stroke.author === "you" &&
+            stroke.points.some(
+              (pt) => pt.x >= box.x0 && pt.x <= box.x1 && pt.y >= box.y0 && pt.y <= box.y1,
+            ),
+        );
+        if (hitsYours) continue;
+        const hitsMine = nickBoxesRef.current.some(
+          (used) => box.x0 < used.x1 && box.x1 > used.x0 && box.y0 < used.y1 && box.y1 > used.y0,
+        );
+        if (hitsMine) continue;
+        nickBoxesRef.current.push(box);
+        if (nickBoxesRef.current.length > 6) nickBoxesRef.current.shift();
+        strokes = placed.map((points) => ({
+          author: "nick" as const,
+          color: NICK_COLOR,
+          wetColor: shade(NICK_COLOR, 0.22),
+          width: 3,
+          points,
+          reveal: 0,
+          bornAt: performance.now(),
+          done: false,
+        }));
+        break;
+      }
+      if (!strokes) return;
       strokesRef.current.push(...strokes);
       if (reduced) {
         for (const stroke of strokes) {

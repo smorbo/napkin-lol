@@ -6,15 +6,11 @@ const TARGETS: { label: string; selector: string }[] = [
   { label: "Select & move", selector: '[aria-label="Pointer"]' },
   { label: "Draw & erase", selector: '[aria-label="Pen"]' },
   { label: "Type", selector: '[aria-label="Text"]' },
-  { label: "Add pictures & GIFs", selector: 'label[title="Image"]' },
+  { label: "Add pictures & GIFs", selector: '[aria-label="Add a picture or a framework"]' },
   { label: "Chat", selector: '[aria-label^="Open chat"], [aria-label="Minimise chat"]' },
   { label: "People", selector: '[aria-label$="people in this Napkin"]' },
-  { label: "Board colour", selector: '[aria-label^="Switch board"]' },
-  { label: "Grid", selector: '[aria-label^="Dot grid"]' },
-  { label: "Door", selector: '[aria-label$="at the door"], [aria-label="Unlock the door"], [aria-label="Lock the door"]' },
-  { label: "Save a copy", selector: '[aria-label="Export Napkin"]' },
-  { label: "Shred", selector: '[aria-label*="hred"]' },
-  { label: "Leave", selector: '[aria-label="Leave this Napkin"]' },
+  { label: "Brightness, board & grid", selector: '[aria-label="More room options"]' },
+  { label: "Door, export, shred & leave", selector: '[aria-label="More room options"]' },
 ];
 
 type Placed = { edge?: string; left?: number; label: string; tx: number; ty: number; lx: number; ly: number; cx: number; cy: number; ex: number; ey: number; bx: number; by: number };
@@ -24,6 +20,7 @@ function layout(): Placed[] {
   const vh = window.innerHeight;
   const placed: Placed[] = [];
   const counts = { top: 0, bottom: 0, left: 0, right: 0 };
+  const seenTargets = new Map<string, number>();
   TARGETS.forEach(({ label, selector }, i) => {
     const el = [...document.querySelectorAll<HTMLElement>(selector)].find((node) => {
       const r = node.getBoundingClientRect();
@@ -47,7 +44,12 @@ function layout(): Placed[] {
     const side = i % 2 ? 1 : -1;
     const cx = (lx + ex) / 2 - dy * 22 * side;
     const cy = (ly + ey) / 2 + dx * 22 * side;
-    placed.push({ label, tx, ty, lx, ly, cx, cy, ex, ey, edge, left: r.left, bx: r.right - 2, by: r.top + 2 });
+    // Steps that share one control (the ••• menu) nudge their number badges
+    // sideways so the badges don't stack into an unreadable pile.
+    const targetKey = `${Math.round(tx)}|${Math.round(ty)}`;
+    const dupe = seenTargets.get(targetKey) ?? 0;
+    seenTargets.set(targetKey, dupe + 1);
+    placed.push({ label, tx, ty, lx, ly, cx, cy, ex, ey, edge, left: r.left, bx: r.right - 2 - dupe * 24, by: r.top + 2 });
   });
   // Right-hand rail: one tidy column of labels, never stacked on top of each other
   const rail = placed.filter((item) => item.edge === "right").sort((a, b) => a.ty - b.ty);

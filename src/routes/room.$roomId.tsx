@@ -26,6 +26,8 @@ import {
   LockOpen,
   MessageCircle,
   Maximize2,
+  Minimize2,
+  MoreHorizontal,
   MousePointer2,
   Moon,
   RotateCw,
@@ -36,6 +38,7 @@ import {
   CircleHelp,
   ShieldCheck,
   Sun,
+  SunDim,
   Trash2,
   LogOut,
   Type,
@@ -60,6 +63,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { RoomExpired } from "@/components/room-expired";
@@ -151,6 +158,14 @@ type ViewTransform = { scale: number; x: number; y: number };
 
 const WIDTH = 1400;
 const HEIGHT = 1400;
+
+/** Personal napkin brightness — a view filter, cycles per tap in the ••• menu. */
+const BRIGHTNESS_LEVELS = [
+  { label: "Dim", value: 0.55 },
+  { label: "Normal", value: 1 },
+  { label: "Bright", value: 1.6 },
+  { label: "Blazing", value: 2.3 },
+] as const;
 /** Rough glyph width so text boxes hit-test close to what is drawn. */
 function textWidthRatio(font: "sketch" | "type" | undefined) {
   return font === "type" ? 0.55 : 0.42;
@@ -262,6 +277,22 @@ function RoomPage() {
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<BoardTheme>("dark");
   const [gridMode, setGridMode] = useState<GridMode>("light");
+  const [brightnessIdx, setBrightnessIdx] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+  function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) void document.exitFullscreen();
+      else void document.documentElement.requestFullscreen();
+    } catch {
+      /* fullscreen is a nicety, never block the room */
+    }
+  }
   const [uploading, setUploading] = useState(false);
   const [pendingText, setPendingText] = useState<{
     x: number;
@@ -2135,9 +2166,9 @@ function RoomPage() {
   }
 
   return (
-    <main className="mesh-background min-h-dvh px-3 pb-3 pt-5 sm:px-5 sm:pb-5 sm:pt-7">
-      <div className="room-shell mx-auto flex max-w-[1500px] flex-col gap-3">
-        <header className="glass-panel relative flex h-12 shrink-0 items-center justify-between rounded-lg px-2 sm:h-14 sm:px-5">
+    <main className="mesh-background min-h-dvh px-2 pb-2 pt-2 sm:px-3 sm:pb-3 sm:pt-3">
+      <div className="room-shell mx-auto flex w-full max-w-[1500px] flex-col gap-2 sm:gap-3">
+        <header className="glass-panel relative flex h-11 shrink-0 items-center justify-between rounded-lg px-2 sm:h-12 sm:px-3">
           <Button
             variant={copied ? "default" : "ghost"}
             size="sm"
@@ -2160,6 +2191,40 @@ function RoomPage() {
           </span>
           <div className="flex items-center gap-1">
             <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setPeopleOpen(true)}
+              title="People in this Napkin"
+              aria-label={`${presentCount} people in this Napkin`}
+              className="relative gap-1.5 rounded-full px-2.5"
+            >
+              <Users className="size-4" />
+              <span className="text-xs font-semibold">{presentCount}</span>
+              {knocks.length > 0 && (
+                <span className="absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                  {knocks.length}
+                </span>
+              )}
+            </Button>
+            <Button
+              variant={chatOpen ? "default" : "ghost"}
+              size="icon-sm"
+              onClick={() => {
+                setChatOpen((open) => !open);
+                if (!chatOpen) setUnread(0);
+              }}
+              aria-label={chatOpen ? "Minimise chat" : unread > 0 ? `Open chat, ${unread} new messages` : "Open chat"}
+              title={chatOpen ? "Minimise chat" : "Open chat"}
+              className="relative rounded-full"
+            >
+              <MessageCircle className="size-4" />
+              {unread > 0 && (
+                <span className="absolute -right-1 -top-1 grid min-w-4 animate-pulse place-items-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+                  {unread}
+                </span>
+              )}
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => {
@@ -2181,22 +2246,21 @@ function RoomPage() {
           </div>
         </header>
 
-        <div
-          className={`grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] gap-3 ${chatOpen ? "lg:grid-cols-[minmax(0,1fr)_340px]" : "lg:grid-cols-[minmax(0,1fr)_auto]"}`}
-        >
+        <div className="relative min-h-0 flex-1">
           <section
             ref={sectionRef}
             onDrop={onDrop}
             onDragOver={(event) => event.preventDefault()}
-            className={`napkin-no-select relative grid min-h-[50vh] min-w-0 items-start justify-items-center overflow-hidden rounded-lg pb-16 transition-[background-color] sm:min-h-[55vh] sm:pb-20 ${theme === "light" ? "board-surface-light" : "board-surface-dark"}`}
+            className={`napkin-no-select board-tray-clear relative grid h-full min-w-0 items-center justify-items-center overflow-hidden pb-16 ${theme === "light" ? "board-surface-light" : "board-surface-dark"}`}
           >
             <div
               ref={boardRef}
-              className={`relative origin-top-left overflow-hidden rounded-lg ${theme === "light" ? "board-frame-light" : "board-frame-dark"}`}
+              className={`relative origin-top-left overflow-hidden rounded-lg ${theme === "light" ? "board-frame-clean-light" : "board-frame-clean-dark"}`}
               style={{
                 width: board.w || "100%",
                 height: board.h || "100%",
                 transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+                filter: `brightness(${BRIGHTNESS_LEVELS[brightnessIdx].value})`,
               }}
             >
               {gridMode !== "off" && <div
@@ -2369,11 +2433,69 @@ function RoomPage() {
             )}
 
 
+            {/* Shred in progress: vote or countdown, floating over the board top */}
+            {(shredRound || shredCooldown > 0) && (
+              <div className="board-control absolute left-1/2 top-3 z-20 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1.5 rounded-full py-1.5 pl-2 pr-2">
+                {shredCooldown > 0 ? (
+                  <>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={hitShred}
+                      className="gap-1.5 rounded-full font-mono tabular-nums transition-transform active:scale-90"
+                      title={`Shredding in ${shredCooldown}s — bash to stop it`}
+                      aria-label={`Shredding in ${shredCooldown} seconds. Press repeatedly to stop it.`}
+                    >
+                      <Trash2 className="size-4" />
+                      <span>{shredCooldown}</span>
+                    </Button>
+                    <div
+                      className="h-1.5 w-16 overflow-hidden rounded-full bg-destructive/20"
+                      role="progressbar"
+                      aria-label="Shred resistance"
+                      aria-valuemin={0}
+                      aria-valuemax={SHRED_HP}
+                      aria-valuenow={Math.max(0, SHRED_HP - shredHits)}
+                    >
+                      <div
+                        key={shredHits}
+                        className="h-full animate-[hp-chip_0.2s_ease-out] rounded-full bg-destructive transition-[width] duration-200 ease-out"
+                        style={{ width: `${(Math.max(0, SHRED_HP - shredHits) / SHRED_HP) * 100}%` }}
+                      />
+                    </div>
+                  </>
+                ) : myVote ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void cancelShred()}
+                    className="knock-pulse rounded-full text-destructive hover:text-destructive"
+                    title="Vote in progress — tap to call it off"
+                    aria-label="Shred vote in progress. Tap to call it off."
+                  >
+                    <Trash2 className="size-4" />
+                    <span className="hidden sm:inline">Shred vote — tap to call it off</span>
+                  </Button>
+                ) : (
+                  <>
+                    <span className="whitespace-nowrap px-1 text-xs font-medium">Shred this Napkin?</span>
+                    <Button variant="ghost" size="icon-sm" className="rounded-full text-destructive hover:text-destructive" onClick={() => void castVote(true)} title="Vote to shred" aria-label="Vote to shred"><Check className="size-4" /></Button>
+                    <Button variant="ghost" size="icon-sm" className="rounded-full" onClick={() => void castVote(false)} title="Vote to keep" aria-label="Vote to keep"><X className="size-4" /></Button>
+                  </>
+                )}
+                {shredRound && !shredExecuteAt && (
+                  <span className="flex gap-1.5 pr-1 font-mono text-[10px] tabular-nums leading-none opacity-80" aria-label={`${agreed} yes, ${votes.length - agreed} no, of ${total}`}>
+                    <span className="text-destructive">✓{agreed}</span>
+                    <span>✗{votes.length - agreed}</span>
+                    <span>/{total}</span>
+                  </span>
+                )}
+              </div>
+            )}
+
             {helpOpen && <NapkinHelp onClose={closeHelp} />}
-            {/* Drawing tools stay visually attached to the drawable board. */}
-            <div className="board-control absolute bottom-3 left-1/2 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full p-1.5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:rounded-md [&_button]:shrink-0" role="toolbar" aria-label="Drawing tools">
-              <span className="hidden px-1.5 text-[9px] font-bold uppercase text-current opacity-70 sm:inline">Tools</span>
-              <span aria-hidden className="mx-0.5 hidden w-px self-stretch bg-current opacity-20 sm:block" />
+            {/* One floating white pill carries the everyday tools; the rest live in ••• */}
+            <div className="absolute bottom-3 left-1/2 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full bg-white p-1.5 text-neutral-900 shadow-2xl ring-1 ring-black/10 sm:bottom-4 [&_button]:shrink-0" role="toolbar" aria-label="Drawing tools">
               {([
                 { id: "select", Icon: MousePointer2, label: "Pointer" },
                 { id: "draw", Icon: Pencil, label: "Pen" },
@@ -2396,7 +2518,7 @@ function RoomPage() {
                         setTool(id);
                       }
                     }}
-                    className={active ? "rounded-md" : "rounded-md text-inherit hover:bg-foreground/10 hover:text-inherit"}
+                    className={active ? "rounded-full" : "rounded-full text-neutral-600 hover:bg-neutral-900/5 hover:text-neutral-900"}
                   >
                     <Icon />
                   </Button>
@@ -2409,7 +2531,7 @@ function RoomPage() {
                     size="icon"
                     title="Add a picture or a framework"
                     aria-label="Add a picture or a framework"
-                    className="rounded-md text-inherit hover:bg-foreground/10 hover:text-inherit"
+                    className="rounded-full text-neutral-600 hover:bg-neutral-900/5 hover:text-neutral-900"
                   >
                     <Upload />
                   </Button>
@@ -2458,7 +2580,6 @@ function RoomPage() {
                   </div>
                 </PopoverContent>
               </Popover>
-              <span aria-hidden className="mx-0.5 w-px self-stretch bg-current opacity-20" />
               <Button
                 variant="ghost"
                 size="icon"
@@ -2466,9 +2587,108 @@ function RoomPage() {
                 onClick={() => void undoMine()}
                 title="Undo my last change"
                 aria-label="Undo my last change"
-                className="rounded-md text-inherit hover:bg-foreground/10 hover:text-inherit disabled:opacity-40"
+                className="rounded-full text-neutral-600 hover:bg-neutral-900/5 hover:text-neutral-900 disabled:opacity-40"
               >
                 <Undo2 />
+              </Button>
+              <span aria-hidden className="mx-0.5 w-px self-stretch bg-neutral-900/15" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="More room options"
+                    aria-label="More room options"
+                    className="rounded-full text-neutral-600 hover:bg-neutral-900/5 hover:text-neutral-900"
+                  >
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="top" sideOffset={10} className="w-60">
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setBrightnessIdx((idx) => (idx + 1) % BRIGHTNESS_LEVELS.length);
+                    }}
+                  >
+                    <SunDim /> Brightness · {BRIGHTNESS_LEVELS[brightnessIdx].label}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      void cycleGrid();
+                    }}
+                  >
+                    <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <circle cx="6" cy="6" r="2" /><circle cx="12" cy="6" r="2" /><circle cx="18" cy="6" r="2" />
+                      <circle cx="6" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="18" cy="12" r="2" />
+                      <circle cx="6" cy="18" r="2" /><circle cx="12" cy="18" r="2" /><circle cx="18" cy="18" r="2" />
+                    </svg>
+                    Grid · {gridMode === "off" ? "Off" : gridMode === "light" ? "Light" : "Dense"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => void toggleTheme()}>
+                    {theme === "dark" ? <Sun /> : <Moon />} Board · {theme === "dark" ? "Black" : "White"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => (knocks.length > 0 ? setPeopleOpen(true) : void toggleDoor())}
+                  >
+                    {locked ? <DoorClosed /> : <DoorOpen />}
+                    {knocks.length > 0
+                      ? `${knocks.length} at the door`
+                      : locked
+                        ? "Unlock the door"
+                        : "Lock the door"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Download /> Export
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onSelect={() => exportChat()}>
+                        <MessageCircle /> Chat
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => exportWhiteboard()}>
+                        <Pencil /> Drawing
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => exportBoth()}>
+                        <Download /> Both
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuItem onSelect={() => setHelpOpen(true)}>
+                    <CircleHelp /> Guide
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setLeaveOpen(true)}>
+                    <LogOut /> Leave room
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      if (shredCooldown > 0) hitShred();
+                      else if (shredRound && myVote) void cancelShred();
+                      else if (!shredRound) void startShred();
+                    }}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 />
+                    {shredCooldown > 0
+                      ? `Shredding in ${shredCooldown}s — bash to stop it`
+                      : shredRound
+                        ? "Shred vote in progress"
+                        : "Shred this Napkin"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                className="rounded-full text-neutral-600 hover:bg-neutral-900/5 hover:text-neutral-900"
+              >
+                {isFullscreen ? <Minimize2 /> : <Maximize2 />}
               </Button>
             </div>
 
@@ -2550,153 +2770,9 @@ function RoomPage() {
             </div>
           </section>
 
-            <div className="flex min-h-0 flex-col gap-2">
-            <section className="flex w-full min-w-0 shrink-0 flex-col items-center gap-1.5 self-center lg:w-auto" aria-label="Room controls">
-              <p className="hidden text-[10px] font-bold uppercase text-muted-foreground sm:block">Room controls</p>
-              <div className="flex w-full max-w-full flex-row flex-nowrap justify-start gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:justify-center sm:gap-2 sm:overflow-visible lg:w-auto lg:flex-col lg:flex-nowrap lg:items-center [&>div]:shrink-0">
-              {/* Bento 1: Chat, People */}
-              <div className="glass-panel flex items-center gap-1 rounded-lg p-1">
-                <Button
-                  variant={chatOpen ? "default" : "secondary"}
-                  size="icon-sm"
-                  onClick={() => {
-                    setChatOpen((open) => !open);
-                    if (!chatOpen) setUnread(0);
-                  }}
-                  aria-label={chatOpen ? "Minimise chat" : unread > 0 ? `Open chat, ${unread} new messages` : "Open chat"}
-                  title={chatOpen ? "Minimise chat" : "Open chat"}
-                  className="relative rounded-md"
-                >
-                  <MessageCircle className="size-4" />
-                  {unread > 0 && (
-                    <span className="absolute -right-1 -top-1 grid min-w-4 animate-pulse place-items-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
-                      {unread}
-                    </span>
-                  )}
-                </Button>
-                <Button variant="secondary" size="icon-sm" onClick={() => setPeopleOpen(true)} title="People in this Napkin" aria-label={`${presentCount} people in this Napkin`} className="gap-1 rounded-md px-2">
-                  <Users className="size-4" /><span className="text-[10px] font-semibold">{presentCount}</span>
-                </Button>
-              </div>
-
-              {/* Bento 3: Theme, grid dots */}
-              <div className="glass-panel flex items-center gap-1 rounded-lg p-1">
-                <Button variant="secondary" size="icon-sm" onClick={() => void toggleTheme()} title={theme === "dark" ? "Switch board to white" : "Switch board to black"} aria-label={theme === "dark" ? "Switch board to white" : "Switch board to black"} className="rounded-md">
-                  {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-                </Button>
-                <Button variant="secondary" size="icon-sm" onClick={() => void cycleGrid()} title={`Dot grid: ${gridMode}`} aria-label={`Dot grid ${gridMode}. Change grid density`} className="relative rounded-md">
-                  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <circle cx="6" cy="6" r="2" /><circle cx="12" cy="6" r="2" /><circle cx="18" cy="6" r="2" />
-                    <circle cx="6" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="18" cy="12" r="2" />
-                    <circle cx="6" cy="18" r="2" /><circle cx="12" cy="18" r="2" /><circle cx="18" cy="18" r="2" />
-                  </svg>
-                  <span className="absolute bottom-0.5 right-1 text-[8px] font-bold">{gridMode === "off" ? "0" : gridMode === "light" ? "1" : "2"}</span>
-                </Button>
-              </div>
-
-              {/* Bento: Door, Save, Shred */}
-              <div className="glass-panel flex items-center gap-1 rounded-lg p-1">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => knocks.length > 0 ? setPeopleOpen(true) : void toggleDoor()}
-                  title={knocks.length > 0 ? "Answer the door" : locked ? "Unlock the door" : "Lock the door"}
-                  aria-label={knocks.length > 0 ? `${knocks.length} at the door` : locked ? "Unlock the door" : "Lock the door"}
-                  className={`relative rounded-md ${locked ? "door-closed" : "door-open"} ${knocks.length > 0 ? "knock-pulse" : ""}`}
-                >
-                  {locked ? <DoorClosed className="size-4" /> : <DoorOpen className="size-4" />}
-                  {knocks.length > 0 && <span className="absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{knocks.length}</span>}
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="icon-sm" className="rounded-md" title="Export Napkin" aria-label="Export Napkin"><Download className="size-4" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => exportChat()}><MessageCircle /> Chat</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => exportWhiteboard()}><Pencil /> Drawing</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => exportBoth()}><Download /> Both</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <div className="flex flex-col items-center gap-0.5">
-                 {shredRound && !shredExecuteAt && shredCooldown === 0 ? (
-                   <>
-                     {myVote ? (
-                       <Button variant="ghost" size="icon-sm" onClick={() => void cancelShred()} className="knock-pulse rounded-md text-destructive hover:text-destructive" title="Vote in progress — tap to call it off" aria-label="Shred vote in progress. Tap to call it off.">
-                         <Trash2 className="size-4" />
-                       </Button>
-                     ) : (
-                       <div className="knock-pulse flex gap-1">
-                         <Button variant="ghost" size="icon-sm" className="rounded-md text-destructive hover:text-destructive" onClick={() => void castVote(true)} title="Vote to shred" aria-label="Vote to shred"><Check className="size-4" /></Button>
-                         <Button variant="ghost" size="icon-sm" className="rounded-md" onClick={() => void castVote(false)} title="Vote to keep" aria-label="Vote to keep"><X className="size-4" /></Button>
-                       </div>
-                     )}
-                     <div className="flex gap-1.5 font-mono text-[10px] tabular-nums leading-none text-muted-foreground" aria-label={`${agreed} yes, ${votes.length - agreed} no, of ${total}`}>
-                       <span className="text-destructive">✓{agreed}</span>
-                       <span>✗{votes.length - agreed}</span>
-                       <span>/{total}</span>
-                     </div>
-                   </>
-                 ) : (
-                 <Button
-                   variant={shredCooldown > 0 ? "destructive" : "ghost"}
-                   size={shredCooldown > 0 ? "sm" : "icon-sm"}
-                   onClick={() => (shredCooldown > 0 ? hitShred() : void startShred())}
-                   className={shredCooldown > 0
-                     ? "gap-1.5 rounded-md bg-destructive font-mono text-destructive-foreground tabular-nums transition-transform hover:bg-destructive active:scale-90"
-                     : "rounded-md text-destructive hover:text-destructive"}
-                   title={shredCooldown > 0 ? `Shredding in ${shredCooldown}s — bash to stop it` : "Start a vote to shred the whiteboard"}
-                   aria-label={shredCooldown > 0 ? `Shredding in ${shredCooldown} seconds. Press repeatedly to stop it.` : "Start a vote to shred the whiteboard"}
-                 >
-                   <Trash2 className="size-4" />
-                   {shredCooldown > 0 && <span>{shredCooldown}</span>}
-                 </Button>
-                 )}
-                 {shredCooldown > 0 && (
-                   <div
-                     className="h-1.5 w-12 overflow-hidden rounded-full bg-destructive/20"
-                     role="progressbar"
-                     aria-label="Shred resistance"
-                     aria-valuemin={0}
-                     aria-valuemax={SHRED_HP}
-                     aria-valuenow={Math.max(0, SHRED_HP - shredHits)}
-                   >
-                     <div
-                       key={shredHits}
-                       className="h-full animate-[hp-chip_0.2s_ease-out] rounded-full bg-destructive transition-[width] duration-200 ease-out"
-                       style={{ width: `${(Math.max(0, SHRED_HP - shredHits) / SHRED_HP) * 100}%` }}
-                     />
-                   </div>
-                 )}
-                </div>
-              </div>
-
-              {/* Bento: Guide, Leave */}
-              <div className="glass-panel flex items-center gap-1 rounded-lg p-1">
-                <Button variant="secondary" size="sm" onClick={() => setHelpOpen(true)} title="Open the visual guide" aria-label="Open guide to drawing tools and room controls" className="h-8 gap-1.5 rounded-md px-2.5 font-semibold">
-                  <CircleHelp className="size-4" />
-                  Guide
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" className="rounded-md" title="Leave this Napkin" aria-label="Leave this Napkin"><LogOut className="size-4" /></Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Leave this Napkin?</AlertDialogTitle>
-                      <AlertDialogDescription>The Napkin keeps going for everyone else. You can come back with the code until it expires.</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Stay</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => window.location.assign("/")}>Leave</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-              </div>
-            </section>
 
             <aside
-              className={`glass-panel-solid min-h-0 flex-1 flex-col overflow-hidden rounded-lg max-lg:fixed max-lg:inset-x-3 max-lg:bottom-3 max-lg:z-40 max-lg:max-h-[62dvh] max-lg:flex-none max-lg:animate-[sheet-up_0.4s_cubic-bezier(0.32,0.72,0,1)] max-lg:shadow-2xl ${chatOpen ? "flex" : "hidden"}`}
+              className={`glass-panel-solid fixed inset-x-3 bottom-3 z-40 max-h-[62dvh] min-h-0 animate-[sheet-up_0.4s_cubic-bezier(0.32,0.72,0,1)] flex-col overflow-hidden rounded-lg shadow-2xl lg:inset-x-auto lg:right-3 lg:top-[4.25rem] lg:bottom-3 lg:max-h-none lg:w-[340px] lg:animate-none ${chatOpen ? "flex" : "hidden"}`}
             >
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <div className="flex items-center gap-2 font-semibold"><MessageCircle className="size-4" /> Chat</div>
@@ -2794,7 +2870,6 @@ function RoomPage() {
               </form>
             </div>
             </aside>
-          </div>
         </div>
       </div>
 
@@ -2983,6 +3058,19 @@ function RoomPage() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave this Napkin?</AlertDialogTitle>
+            <AlertDialogDescription>The Napkin keeps going for everyone else. You can come back with the code until it expires.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={() => window.location.assign("/")}>Leave</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </main>
   );
