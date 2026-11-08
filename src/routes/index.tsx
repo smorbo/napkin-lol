@@ -479,6 +479,14 @@ function Index() {
           </span>
         </div>
         <div className="flex gap-5">
+          <a
+            href="https://github.com/smorbo/napkin-lol"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-foreground"
+          >
+            Open source
+          </a>
           <Link to="/privacy" className="hover:text-foreground">
             Privacy Policy
           </Link>

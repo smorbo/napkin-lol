@@ -36,6 +36,15 @@ export function PrivacyConsent() {
           <Link to="/privacy" className="text-foreground underline underline-offset-2">
             Privacy Policy
           </Link>
+          . Napkin is open source — you can read every line of it on{" "}
+          <a
+            href="https://github.com/smorbo/napkin-lol"
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline underline-offset-2"
+          >
+            GitHub
+          </a>
           .
         </p>
       </div>

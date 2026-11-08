@@ -498,11 +498,7 @@ export function NapkinHero() {
 
       <div
         ref={wrapRef}
-        className="relative h-[380px] overflow-hidden rounded-[4px] shadow-[0_35px_80px_-25px_rgba(0,0,0,0.55)] sm:h-[460px]"
-        style={{
-          background:
-            "radial-gradient(rgba(60,50,20,0.055) 1px, transparent 1.4px) 0 0 / 26px 26px, linear-gradient(160deg, #fffef9 0%, #fdfaf0 55%, #f7f1de 100%)",
-        }}
+        className="napkin-paper relative h-[380px] overflow-hidden rounded-[4px] shadow-[0_35px_80px_-25px_rgba(0,0,0,0.55)] sm:h-[460px]"
       >
         <canvas
           ref={canvasRef}
@@ -524,12 +520,6 @@ export function NapkinHero() {
         >
           Nick
         </span>
-        <img
-          src="/favicon.png"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute -bottom-1 right-10 w-14 rotate-3 object-contain opacity-90"
-        />
         {note && (
           <div
             key={note.id}
